@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/dimfeld/httptreemux/v5"
+	"github.com/ardanlabs/service/foundation/web"
 )
 
 // API constructs an http.Handler with all application routes defined.
-func API(build string, shutdown chan os.Signal, log *log.Logger) *httptreemux.ContextMux {
-	mux := httptreemux.NewContextMux()
+func API(build string, shutdown chan os.Signal, log *log.Logger) *web.App {
+	app := web.NewApp(shutdown)
 
-	mux.Handle(http.MethodGet, "/readiness", readiness)
+	app.Handle(http.MethodGet, "/readiness", readiness)
 
-	return mux
+	return app
 }
