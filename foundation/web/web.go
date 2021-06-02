@@ -5,6 +5,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"syscall"
 
 	"github.com/dimfeld/httptreemux/v5"
 )
@@ -19,32 +20,43 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 type App struct {
 	*httptreemux.ContextMux
 	shutdown chan os.Signal
+	mw       []Middleware
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
-func NewApp(shutdown chan os.Signal) *App {
+func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	app := App{
 		ContextMux: httptreemux.NewContextMux(),
 		shutdown:   shutdown,
+		mw:         mw,
 	}
 
 	return &app
 }
 
+// SignalShutdown is used to gracefully shutdown the app when an integrity
+// issue is identified.
+func (a *App) SignalShutdown() {
+	a.shutdown <- syscall.SIGTERM
+}
+
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
-func (a *App) Handle(method string, path string, readiness Handler) {
+func (a *App) Handle(method string, path string, handler Handler, mw ...Middleware) {
+
+	// First wrap handler specific middleware around this handler.
+	handler = wrapMiddleware(mw, handler)
+
+	// Add the application's general middleware to the handler chain.
+	handler = wrapMiddleware(a.mw, handler)
 
 	h := func(w http.ResponseWriter, r *http.Request) {
 
-		// CODE
-
-		err := readiness(r.Context(), w, r)
-		if err != nil {
-			// ERROR HANDLING
+		if err := handler(r.Context(), w, r); err != nil {
+			// a.SignalShutdown()
+			return
 		}
 
-		// CODE
 	}
 
 	a.ContextMux.Handle(method, path, h)
