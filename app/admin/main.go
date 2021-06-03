@@ -6,18 +6,94 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/pkg/errors"
 )
 
 func main() {
-	err := GenKey()
+	err := GenToken() //GenKey()
 
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func GenToken() error {
+
+	pkf, err := os.Open("/Users/bill/code/class/private.pem")
+	if err != nil {
+		return errors.Wrap(err, "opening PEM private key file")
+	}
+	defer pkf.Close()
+	privatePEM, err := io.ReadAll(io.LimitReader(pkf, 1024*1024))
+	if err != nil {
+		return errors.Wrap(err, "reading PEM private key file")
+	}
+
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privatePEM)
+	if err != nil {
+		return errors.Wrap(err, "parsing PEM into private key")
+	}
+
+	claims := struct {
+		jwt.StandardClaims
+		Roles []string
+	}{
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    "service project",
+			Subject:   "1234567789",
+			ExpiresAt: jwt.At(time.Now().Add(8760 * time.Hour)),
+			IssuedAt:  jwt.Now(),
+		},
+		Roles: []string{"ADMIN"},
+	}
+
+	method := jwt.GetSigningMethod("RS256")
+	if method == nil {
+		return errors.Errorf("unknown algorithm %v", "RS256")
+	}
+
+	token := jwt.NewWithClaims(method, claims)
+
+	str, err := token.SignedString(privateKey)
+	if err != nil {
+		return errors.Wrap(err, "signing token")
+	}
+
+	fmt.Println("======================================")
+	fmt.Println(str)
+	fmt.Println("======================================")
+
+	// ----------------------------------------------------------------------
+
+	parser := jwt.NewParser(jwt.WithValidMethods([]string{"RS256"}), jwt.WithAudience("student"))
+
+	var clm struct {
+		jwt.StandardClaims
+		Roles []string
+	}
+
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		return &privateKey.PublicKey, nil
+	}
+
+	tkn, err := parser.ParseWithClaims(str, &clm, keyFunc)
+	if err != nil {
+		return err
+	}
+
+	if !tkn.Valid {
+		return errors.New("invalid token")
+	}
+
+	fmt.Println("Validated", tkn.Claims, tkn.Header)
+
+	return nil
 }
 
 func GenKey() error {
