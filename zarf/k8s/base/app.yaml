@@ -29,7 +29,7 @@ metadata:
   name: sales-api
 spec:
   selector:
-    service: sales-api
+    app: sales-api
   ports:
   - name: app
     port: 3000
