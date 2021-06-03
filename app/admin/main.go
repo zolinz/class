@@ -29,7 +29,7 @@ func main() {
 
 func GenToken() error {
 
-	pkf, err := os.Open("/zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem")
+	pkf, err := os.Open("zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem")
 	if err != nil {
 		return errors.Wrap(err, "opening PEM private key file")
 	}
@@ -54,7 +54,7 @@ func GenToken() error {
 			ExpiresAt: jwt.At(time.Now().Add(8760 * time.Hour)),
 			IssuedAt:  jwt.Now(),
 		},
-		Roles: []string{"ADMIN"},
+		Roles: []string{"USER"},
 	}
 
 	method := jwt.GetSigningMethod("RS256")
