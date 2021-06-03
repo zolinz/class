@@ -35,6 +35,10 @@ kind-status:
 	kubectl get nodes
 	kubectl get pods --watch
 
+kind-update: sales-api
+	kind load docker-image sales-api-amd64:1.0 --name ardan-starter-cluster
+	kubectl delete pods -lapp=sales-api
+
 # ==============================================================================
 
 run:
