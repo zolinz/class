@@ -29,7 +29,7 @@ func main() {
 
 func GenToken() error {
 
-	pkf, err := os.Open("/Users/bill/code/class/zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem")
+	pkf, err := os.Open("/zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem")
 	if err != nil {
 		return errors.Wrap(err, "opening PEM private key file")
 	}
