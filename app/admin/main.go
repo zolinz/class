@@ -59,6 +59,7 @@ func GenToken() error {
 	}
 
 	token := jwt.NewWithClaims(method, claims)
+	token.Header["kid"] = "12312312-sadas-2eq34-s-asfd"
 
 	str, err := token.SignedString(privateKey)
 	if err != nil {
@@ -79,6 +80,7 @@ func GenToken() error {
 	}
 
 	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		// kid := t.Header["kid"].(string)
 		return &privateKey.PublicKey, nil
 	}
 
