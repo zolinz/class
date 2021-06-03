@@ -25,7 +25,7 @@ func main() {
 
 func GenToken() error {
 
-	pkf, err := os.Open("/Users/bill/code/class/private.pem")
+	pkf, err := os.Open("/Users/bill/code/class/zarf/keys/54bb2165-71e1-41a6-af3e-7da4a0e1e2c1.pem")
 	if err != nil {
 		return errors.Wrap(err, "opening PEM private key file")
 	}
@@ -59,7 +59,7 @@ func GenToken() error {
 	}
 
 	token := jwt.NewWithClaims(method, claims)
-	token.Header["kid"] = "12312312-sadas-2eq34-s-asfd"
+	token.Header["kid"] = "54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"
 
 	str, err := token.SignedString(privateKey)
 	if err != nil {
