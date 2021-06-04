@@ -50,6 +50,10 @@ kind-update: sales-api
 
 # ==============================================================================
 
+test:
+	go test ./... -count=1
+	staticcheck ./...
+
 run:
 	go run app/sales-api/main.go
 
