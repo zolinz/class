@@ -15,6 +15,7 @@ import (
 	"github.com/ardanlabs/conf"
 	"github.com/ardanlabs/service/app/sales-api/handlers"
 	"github.com/ardanlabs/service/business/sys/auth"
+	"github.com/ardanlabs/service/foundation/database"
 	"github.com/ardanlabs/service/foundation/keystore"
 	"github.com/pkg/errors"
 )
@@ -56,6 +57,15 @@ func run(log *log.Logger) error {
 		Auth struct {
 			KeysFolder string `conf:"default:zarf/keys/"`
 			Algorithm  string `conf:"default:RS256"`
+		}
+		DB struct {
+			User         string `conf:"default:postgres"`
+			Password     string `conf:"default:postgres,mask"`
+			Host         string `conf:"default:db"`
+			Name         string `conf:"default:postgres"`
+			MaxIdleConns int    `conf:"default:0"`
+			MaxOpenConns int    `conf:"default:0"`
+			DisableTLS   bool   `conf:"default:true"`
 		}
 	}
 	cfg.Version.SVN = build
@@ -112,6 +122,28 @@ func run(log *log.Logger) error {
 	}
 
 	// =========================================================================
+	// Start Database
+
+	log.Println("main: Initializing database support")
+
+	db, err := database.Open(database.Config{
+		User:         cfg.DB.User,
+		Password:     cfg.DB.Password,
+		Host:         cfg.DB.Host,
+		Name:         cfg.DB.Name,
+		MaxIdleConns: cfg.DB.MaxIdleConns,
+		MaxOpenConns: cfg.DB.MaxOpenConns,
+		DisableTLS:   cfg.DB.DisableTLS,
+	})
+	if err != nil {
+		return errors.Wrap(err, "connecting to db")
+	}
+	defer func() {
+		log.Printf("main: Database Stopping: %s", cfg.DB.Host)
+		db.Close()
+	}()
+
+	// =========================================================================
 	// Start Debug Service
 	//
 	// /debug/pprof - Added to the default mux by importing the net/http/pprof package.
@@ -140,7 +172,7 @@ func run(log *log.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(build, shutdown, log, auth),
+		Handler:      handlers.API(build, shutdown, log, auth, db),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}
