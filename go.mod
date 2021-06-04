@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/ardanlabs/conf v1.4.0
+	github.com/ardanlabs/darwin v1.2.0
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/dimfeld/httptreemux/v5 v5.3.0
 	github.com/go-playground/locales v0.13.0
