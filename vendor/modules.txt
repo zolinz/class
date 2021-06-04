@@ -40,6 +40,9 @@ github.com/lib/pq/scram
 ## explicit
 github.com/pkg/errors
 # golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+## explicit
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
 golang.org/x/crypto/sha3
 # golang.org/x/sys v0.0.0-20190412213103-97732733099d
 golang.org/x/sys/cpu
