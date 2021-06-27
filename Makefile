@@ -22,3 +22,8 @@ tidy:
 
 run:
 	go run app/sales-api/main.go
+
+
+keygen:
+	go run app/admin/main.go
+
