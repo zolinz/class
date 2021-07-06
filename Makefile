@@ -27,3 +27,34 @@ run:
 keygen:
 	go run app/admin/main.go
 
+# ==============================================================================
+# Building containers
+
+all: sales metrics
+
+sales:
+	docker build \
+		-f zarf/docker/dockerfile.sales-api \
+		-t sales-api-amd64:1.5 \
+		--build-arg VCS_REF=`git rev-parse HEAD` \
+		--build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
+		.
+
+metrics:
+	docker build \
+		-f zarf/docker/dockerfile.metrics \
+		-t metrics-amd64:1.0 \
+		--build-arg VCS_REF=`git rev-parse HEAD` \
+		--build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
+		.
+
+docker-tag-push:
+	docker tag sales-api-amd64:1.5 zolinz/sales-api-amd64:1.5
+	docker push zolinz/sales-api-amd64:1.5
+
+docker-tag-push-metrics:
+	docker tag metrics-amd64:1.0 zolinz/metrics-amd64:1.0
+	docker push zolinz/metrics-amd64:1.0
+
+apply:
+	kustomize build zarf/k8s/dev | kubectl -n zoli-ext apply -f -
