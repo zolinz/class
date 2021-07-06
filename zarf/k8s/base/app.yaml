@@ -20,7 +20,7 @@ spec:
         - name: zipkin
           containerPort: 9411
       - name: app
-        image: zolinz/sales-api-amd64:1.5
+        image: zolinz/sales-api-amd64:1.6
         env:
         - name: SALES_DB_HOST
           valueFrom:

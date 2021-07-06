@@ -35,7 +35,7 @@ all: sales metrics
 sales:
 	docker build \
 		-f zarf/docker/dockerfile.sales-api \
-		-t sales-api-amd64:1.5 \
+		-t sales-api-amd64:1.6 \
 		--build-arg VCS_REF=`git rev-parse HEAD` \
 		--build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
 		.
@@ -49,8 +49,9 @@ metrics:
 		.
 
 docker-tag-push:
-	docker tag sales-api-amd64:1.5 zolinz/sales-api-amd64:1.5
-	docker push zolinz/sales-api-amd64:1.5
+	docker tag sales-api-amd64:1.6 zolinz/sales-api-amd64:1.6
+	docker push zolinz/sales-api-amd64:1.6
+	kubectl delete pods -lapp=sales-api
 
 docker-tag-push-metrics:
 	docker tag metrics-amd64:1.0 zolinz/metrics-amd64:1.0
